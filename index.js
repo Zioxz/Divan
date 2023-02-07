@@ -31,7 +31,7 @@ register("step", () => {
                         assignedprice = assignedprice + (31 * m)
                     }
                     if (itemName.includes("Leggings Of Divan")) {
-                        assignedprice = assignedprice + (31 * m)
+                        assignedprice = assignedprice + (29 * m)
                     }
                     if (itemName.includes("Boots Of Divan")) {
                         assignedprice = assignedprice + (25 * m)
@@ -56,6 +56,9 @@ register("step", () => {
                                 let numberOfSlotsLength = numberOfSlots.length;
                                 assignedprice = assignedprice + (5 * m * numberOfSlotsLength)
                             }
+                            if (actualItem.getNBT().toObject()["tag"]["ExtraAttributes"]["rarity_upgrades"] == 1) {
+                                assignedprice = assignedprice + (5 * m)
+                            }
                         }
                     }
                     if (itemName.includes("Jaded")) {
@@ -69,18 +72,15 @@ register("step", () => {
                             price = parseInt(price);
                         }
                     })
+                    let profit = assignedprice - price
+                    let profitPercentage = ((assignedprice / price) * 100)
                     if (price <= assignedprice) {
-                        let profitPercentage = ((assignedprice / price) * 100)
-                        let profit = assignedprice - price
                         profitPercentage = parseFloat(profitPercentage).toFixed(2)
-                        if (profitPercentage >= 105) {
-                            profitPercentage = profitPercentage + "%"
-                            console.log(profitPercentage + " for " + price)
-                        }
+                        profitPercentage = profitPercentage + "%"
                     }
                     //console.log(itemName + " ending " + assignedprice + " " + i)
                     if (price <= (.95 * assignedprice) && profit >= (4 * m) && price != 0 && assignedprice != 0) {
-                        //console.log("Divan found for: " + price + "when assigned price is " + assignedprice)
+                        console.log("Divan found for: " + price + "when assigned price is " + assignedprice)
                         Player.getContainer().click(i, false, "MIDDLE");
                     }
                 }
@@ -88,7 +88,7 @@ register("step", () => {
             page();
         }
     }
-}).setFps(2)
+}).setFps(4)
 
 function page() {
     inv = Player.getContainer()
