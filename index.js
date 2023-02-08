@@ -2,27 +2,33 @@ let divanpf = false;
 
 
 register('command', () => {
-    divanpf = !divanpf;
+    divanpf = !divanpf; 
     ChatLib.chat(`§7[Divan PF] ${divanpf ? "§aEnabled" : "§cDisabled"}§b.`);
 }).setName("divan")
 
 
 const C0EPacketClickWindow = Java.type("net.minecraft.network.play.client.C0EPacketClickWindow")
 const sendWindowClick = (windowId, slot, clickType, actionNumber = 0) => Client.sendPacket(new C0EPacketClickWindow(windowId ?? Player.getContainer().getWindowId(), slot, clickType ?? 0, 0, null, actionNumber))
+const Base64 = java.util.Base64
 
 register("step", () => {
     if (divanpf == true) {
-        let containerName = Player.getContainer().getName()
+        const containerName = Player.getContainer().getName()
         //console.log(containerName)
-        if (Player.getContainer().getName().includes('Auctions: "Divan"')) {
+        if (containerName.includes('Auctions: "Divan"')) {
+            /*
+            const divan = Player.getContainer().getItems()[22]?.getNBT()
+            let a = Base64.getEncoder().encodeToString(new java.lang.String(divan).getBytes())
+            console.log(a)
+            */
             for (let i = 11; i <= 43; i++) {
-                let price = 0;
-                let actualItem = Player.getContainer().getItems()[i];
+                const price = 0;
+                const actualItem = Player.getContainer().getItems()[i];
                 let assignedprice = 0
-                let m = 1000000
+                const m = 1000000
                 if (actualItem == undefined || actualItem == null)
                     continue;
-                let itemName = actualItem?.getName().removeFormatting()
+                const itemName = actualItem?.getName().removeFormatting()
                 if (itemName.includes("Divan")) {
                     if (itemName.includes("Helmet Of Divan")) {
                         assignedprice = assignedprice + (27 * m)
@@ -37,24 +43,20 @@ register("step", () => {
                         assignedprice = assignedprice + (25 * m)
                     }
                     if (actualItem.getNBT().toObject()["tag"]["ExtraAttributes"] != undefined) {
-                        let nbt = actualItem.getNBT().toObject();
-                        let items = nbt.tag?.ExtraAttributes?.gems
+                        const nbt = actualItem.getNBT().toObject();
+                        const items = JSON.stringify(nbt.tag?.ExtraAttributes?.gems)
                         if (items != null || items != undefined) {
-                            items = JSON.stringify(items)
-                            let flawlessGems = items.match(/FLAWLESS/g)
+                            const flawlessGems = items.match(/FLAWLESS/g)
                             if (flawlessGems != null) {
-                                let flawlessGemsLength = flawlessGems.length
-                                assignedprice = assignedprice + (1.5 * m * flawlessGemsLength)
+                                assignedprice = assignedprice + (1.5 * m * flawlessGems.length)
                             }
-                            let perfectGems = items.match(/PERFECT/g)
+                            const perfectGems = items.match(/PERFECT/g)
                             if (perfectGems != null) {
-                                let perfectGemsLength = perfectGems.length
-                                assignedprice = assignedprice + (9.5 * m * perfectGemsLength)
+                                assignedprice = assignedprice + (9.5 * m * perfectGems.length)
                             }
-                            let numberOfSlots = nbt.tag?.ExtraAttributes?.gems?.unlocked_slots;
+                            const numberOfSlots = nbt.tag?.ExtraAttributes?.gems?.unlocked_slots;
                             if (numberOfSlots != null) {
-                                let numberOfSlotsLength = numberOfSlots.length;
-                                assignedprice = assignedprice + (5 * m * numberOfSlotsLength)
+                                assignedprice = assignedprice + (5 * m * numberOfSlots.length)
                             }
                             if (actualItem.getNBT().toObject()["tag"]["ExtraAttributes"]["rarity_upgrades"] == 1) {
                                 assignedprice = assignedprice + (5 * m)
@@ -64,22 +66,13 @@ register("step", () => {
                     if (itemName.includes("Jaded")) {
                         assignedprice = assignedprice + (5 * m)
                     }
-                    Player.getContainer().getItems()[i]?.getLore()?.forEach(line => {
+                    actualItem.getLore()?.forEach(line => {
                         if (ChatLib.removeFormatting(line)?.startsWith("Buy it now:")) {
-                            var hype = ChatLib.removeFormatting(line).replace("Buy it now: ", "");
-                            price = hype.replaceAll(",", "");
-                            price = price.replace(" coins", "");
-                            price = parseInt(price);
+                            price = parseInt(ChatLib.removeFormatting(line).replace(/Buy it now: |,| coins/g, ""))
                         }
                     })
-                    let profit = assignedprice - price
-                    let profitPercentage = ((assignedprice / price) * 100)
-                    if (price <= assignedprice) {
-                        profitPercentage = parseFloat(profitPercentage).toFixed(2)
-                        profitPercentage = profitPercentage + "%"
-                    }
-                    //console.log(itemName + " ending " + assignedprice + " " + i)
-                    if (price <= (.95 * assignedprice) && profit >= (4 * m) && price != 0 && assignedprice != 0) {
+                    const profit = assignedprice - price
+                    if (price <= (.9 * assignedprice) && profit >= (4 * m) && price != 0 && assignedprice != 0) {
                         console.log("Divan found for: " + price + "when assigned price is " + assignedprice)
                         Player.getContainer().click(i, false, "MIDDLE");
                     }
@@ -88,7 +81,7 @@ register("step", () => {
             page();
         }
     }
-}).setFps(4)
+}).setFps(1)
 
 function page() {
     inv = Player.getContainer()
@@ -105,11 +98,10 @@ function page() {
 
 register("Step", () => {
     if (divanpf === true) {
-        if (Player.getContainer().getName() === ("Auction House") || Player.getContainer().getName() === ("Co-op Auction House")) {
+        if (Player.getContainer().getName().includes("Auction House")) {
             Player.getContainer().click(11, false, "MIDDLE");
         }
-        if (!Player.getContainer() === null) return;
-        if (Player.getContainer().getName().includes("container")) {
+        else if (Player.getContainer()?.getName()?.includes("container")) {
             ChatLib.say("/ah");
         }
     }
